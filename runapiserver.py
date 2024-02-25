@@ -3,7 +3,6 @@ import os
 import base64
 import requests
 from werkzeug.utils import secure_filename
-import boto3
 import subprocess
 
 app = Flask(__name__)
