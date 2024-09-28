@@ -11,7 +11,7 @@ export default {
       // Check if the request contains a valid image
       const contentType = request.headers.get("Content-Type");
       if (!contentType || !contentType.startsWith("image/")) {
-        return new Response('Invalid image type. Please send a valid image.', { status: 400 });
+        return new Response('Invalid image type! Please send a valid image.', { status: 400 });
       }
   
       // Read the image from the request body
