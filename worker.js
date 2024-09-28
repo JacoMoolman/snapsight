@@ -1,7 +1,7 @@
 export default {
   async fetch(request, env) {
     if (!env.AI) {
-      return new Response('AI service is not configured!!!', { status: 500 });
+      return new Response('AI service is not configured!!!!', { status: 500 });
     }
 
     const res = await fetch("https://cataas.com/cat");
