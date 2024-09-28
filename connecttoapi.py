@@ -5,7 +5,8 @@ import base64
 url = 'https://snapsight2.jacomoolman1890.workers.dev/'
 
 # Specify the path to your image file
-image_path = 'dog.jpg'
+# image_path = 'dog.jpg'
+image_path = 'sun.jpg'
 
 # Read the image file and encode it as base64
 with open(image_path, 'rb') as image_file:
@@ -14,7 +15,7 @@ with open(image_path, 'rb') as image_file:
 # Prepare the JSON payload
 payload = {
     'image': image_base64,
-    'prompt': 'What type of dog is this?'
+    'prompt': 'What time of day is this?'
 }
 
 # Send the POST request
