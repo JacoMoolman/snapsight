@@ -8,19 +8,24 @@ export default {
         return new Response('Send a POST request with an image', { status: 400 });
       }
   
-      // Check if the request contains a valid image
       const contentType = request.headers.get("Content-Type");
-      if (!contentType || !contentType.startsWith("image/")) {
-        return new Response('Invalid image type! Please send a valid image.', { status: 400 });
+      if (!contentType || !contentType.startsWith("application/json")) {
+        return new Response('Invalid content type! Please send a JSON payload.', { status: 400 });
       }
   
-      // Read the image from the request body
-      const blob = await request.arrayBuffer();  // Convert the image to an ArrayBuffer
+      const { image, prompt } = await request.json();
+  
+      if (!image || !prompt) {
+        return new Response('Missing image or prompt in the request body', { status: 400 });
+      }
+  
+      // Decode base64 image
+      const imageBuffer = Uint8Array.from(atob(image), c => c.charCodeAt(0));
   
       // Prepare input for the AI model
       const input = {
-        image: [...new Uint8Array(blob)],  // Convert the ArrayBuffer to a Uint8Array
-        prompt: "Generate a caption for this image",
+        image: [...imageBuffer],
+        prompt: prompt,
         max_tokens: 512,
       };
   
@@ -39,4 +44,3 @@ export default {
       }
     },
   };
-  
