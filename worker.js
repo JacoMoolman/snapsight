@@ -23,7 +23,7 @@ export default {
       const imageBuffer = Uint8Array.from(atob(image), c => c.charCodeAt(0));
   
       // Combine internal prompt with user prompt
-      const internalPrompt = "Keep in mind the person sending this image and prompt is blind. Be helpfull, kind and descriptiveKeep that in mind as you address the following prompt: ";
+      const internalPrompt = "Keep in mind the person sending this image and prompt is blind. Be helpfull, kind and descriptiveKeep that in mind as you address the following prompt:  ";
       const combinedPrompt = `${internalPrompt}${prompt}`;
   
       // Prepare input for the AI model
