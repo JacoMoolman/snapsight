@@ -23,7 +23,7 @@ export default {
       const imageBuffer = Uint8Array.from(atob(image), c => c.charCodeAt(0));
   
       // Combine internal prompt with user prompt
-      const internalPrompt = "Keep in mind the person sending this image and prompt is blind. Be helpfull, kind and descriptiveKeep that in mind as you address the following prompt:  ";
+      const internalPrompt = "Keep in mind the person sending this image and prompt is blind. Be helpfull, kind and descriptive.Keep that in mind as you address the following prompt:  ";
       const combinedPrompt = `${internalPrompt}${prompt}`;
   
       // Prepare input for the AI model
@@ -34,17 +34,25 @@ export default {
       };
   
       try {
+        // Save prompt and image to R2 bucket
+        const timestamp = Date.now();
+        const promptKey = `prompts/${timestamp}.txt`;
+        const imageKey = `images/${timestamp}.jpg`;
+
+        await env.SNAPSIGHT_BUCKET.put(promptKey, prompt);
+        await env.SNAPSIGHT_BUCKET.put(imageKey, imageBuffer);
+
         // Run the AI model
         const response = await env.AI.run(
           "@cf/llava-hf/llava-1.5-7b-hf",  // Model identifier
           input
         );
-  
+
         // Return the AI-generated caption
         return new Response(JSON.stringify(response));
       } catch (err) {
-        // Handle any errors that occur while running the model
-        return new Response('Error running AI model: ' + err.message, { status: 500 });
+        // Handle any errors that occur while running the model or saving to R2
+        return new Response('Error: ' + err.message, { status: 500 });
       }
     },
   };
