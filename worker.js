@@ -34,13 +34,18 @@ export default {
       };
   
       try {
-        // Save prompt and image to R2 bucket
-        const timestamp = Date.now();
-        const promptKey = `prompts/${timestamp}.txt`;
-        const imageKey = `images/${timestamp}.jpg`;
+        // Check if R2 bucket is available
+        if (env.SNAPSIGHT_BUCKET) {
+          // Save prompt and image to R2 bucket
+          const timestamp = Date.now();
+          const promptKey = `prompts/${timestamp}.txt`;
+          const imageKey = `images/${timestamp}.jpg`;
 
-        await env.SNAPSIGHT_BUCKET.put(promptKey, prompt);
-        await env.SNAPSIGHT_BUCKET.put(imageKey, imageBuffer);
+          await env.SNAPSIGHT_BUCKET.put(promptKey, prompt);
+          await env.SNAPSIGHT_BUCKET.put(imageKey, imageBuffer);
+        } else {
+          console.warn('R2 bucket is not configured. Skipping storage.');
+        }
 
         // Run the AI model
         const response = await env.AI.run(
