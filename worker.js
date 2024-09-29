@@ -34,29 +34,36 @@ export default {
       };
   
       try {
-        // Check if R2 bucket is available
-        if (env.SNAPSIGHT_BUCKET) {
-          // Save prompt and image to R2 bucket
-          const timestamp = Date.now();
-          const promptKey = `prompts/${timestamp}.txt`;
-          const imageKey = `images/${timestamp}.jpg`;
-
-          await env.SNAPSIGHT_BUCKET.put(promptKey, prompt);
-          await env.SNAPSIGHT_BUCKET.put(imageKey, imageBuffer);
-        } else {
-          console.warn('R2 bucket is not configured. Skipping storage.');
-        }
-
         // Run the AI model
         const response = await env.AI.run(
           "@cf/llava-hf/llava-1.5-7b-hf",  // Model identifier
           input
         );
 
-        // Return the AI-generated caption
-        return new Response(JSON.stringify(response));
+        // Prepare the response
+        const responseBody = JSON.stringify(response);
+
+        // Send the response immediately
+        const responsePromise = new Response(responseBody);
+
+        // Save data to R2 bucket asynchronously
+        if (env.SNAPSIGHT_BUCKET) {
+          const timestamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, -5); // YYYY-MM-DD-HH-MM-SS
+          const folderName = `${timestamp}`;
+          const imageKey = `${folderName}/image.jpg`;
+          const promptKey = `${folderName}/prompt.txt`;
+
+          const promptContent = `Input prompt: ${prompt}\n\nOutput: ${responseBody}`;
+
+          env.SNAPSIGHT_BUCKET.put(imageKey, imageBuffer);
+          env.SNAPSIGHT_BUCKET.put(promptKey, promptContent);
+        } else {
+          console.warn('R2 bucket is not configured. Skipping storage.');
+        }
+
+        return responsePromise;
       } catch (err) {
-        // Handle any errors that occur while running the model or saving to R2
+        // Handle any errors that occur while running the model
         return new Response('Error: ' + err.message, { status: 500 });
       }
     },
