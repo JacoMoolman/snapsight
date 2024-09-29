@@ -43,29 +43,27 @@ export default {
         // Prepare the response
         const responseBody = JSON.stringify(response);
 
-        // Create a promise for saving data to R2 bucket
-        const saveDataPromise = (async () => {
-          if (env.SNAPSIGHT_BUCKET) {
-            const timestamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, -5); // YYYY-MM-DD-HH-MM-SS
-            const folderName = `${timestamp}`;
-            const imageKey = `${folderName}/image.jpg`;
-            const promptKey = `${folderName}/prompt.txt`;
+        // Save data to R2 bucket
+        if (env.SNAPSIGHT_BUCKET) {
+          const timestamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, -5); // YYYY-MM-DD-HH-MM-SS
+          const folderName = `${timestamp}`;
+          const imageKey = `${folderName}/image.jpg`;
+          const promptKey = `${folderName}/prompt.txt`;
 
-            const promptContent = `Input prompt: ${prompt}\n\nOutput: ${responseBody}`;
+          const promptContent = `Input prompt: ${prompt}\n\nOutput: ${responseBody}`;
 
-            await env.SNAPSIGHT_BUCKET.put(imageKey, imageBuffer);
-            await env.SNAPSIGHT_BUCKET.put(promptKey, promptContent);
-          } else {
-            console.warn('R2 bucket is not configured. Skipping storage.');
-          }
-        })();
+          await env.SNAPSIGHT_BUCKET.put(imageKey, imageBuffer);
+          await env.SNAPSIGHT_BUCKET.put(promptKey, promptContent);
+        } else {
+          console.warn('R2 bucket is not configured. Skipping storage.');
+        }
 
-        // Return the response immediately
+        // Return the response after saving to R2
         return new Response(responseBody, {
           headers: { 'Content-Type': 'application/json' },
         });
       } catch (err) {
-        // Handle any errors that occur while running the model
+        // Handle any errors that occur while running the model or saving to R2
         return new Response('Error: ' + err.message, { status: 500 });
       }
     },
