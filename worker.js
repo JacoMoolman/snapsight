@@ -43,25 +43,27 @@ export default {
         // Prepare the response
         const responseBody = JSON.stringify(response);
 
-        // Send the response immediately
-        const responsePromise = new Response(responseBody);
+        // Create a promise for saving data to R2 bucket
+        const saveDataPromise = (async () => {
+          if (env.SNAPSIGHT_BUCKET) {
+            const timestamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, -5); // YYYY-MM-DD-HH-MM-SS
+            const folderName = `${timestamp}`;
+            const imageKey = `${folderName}/image.jpg`;
+            const promptKey = `${folderName}/prompt.txt`;
 
-        // Save data to R2 bucket asynchronously
-        if (env.SNAPSIGHT_BUCKET) {
-          const timestamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, -5); // YYYY-MM-DD-HH-MM-SS
-          const folderName = `${timestamp}`;
-          const imageKey = `${folderName}/image.jpg`;
-          const promptKey = `${folderName}/prompt.txt`;
+            const promptContent = `Input prompt: ${prompt}\n\nOutput: ${responseBody}`;
 
-          const promptContent = `Input prompt: ${prompt}\n\nOutput: ${responseBody}`;
+            await env.SNAPSIGHT_BUCKET.put(imageKey, imageBuffer);
+            await env.SNAPSIGHT_BUCKET.put(promptKey, promptContent);
+          } else {
+            console.warn('R2 bucket is not configured. Skipping storage.');
+          }
+        })();
 
-          env.SNAPSIGHT_BUCKET.put(imageKey, imageBuffer);
-          env.SNAPSIGHT_BUCKET.put(promptKey, promptContent);
-        } else {
-          console.warn('R2 bucket is not configured. Skipping storage.');
-        }
-
-        return responsePromise;
+        // Return the response immediately
+        return new Response(responseBody, {
+          headers: { 'Content-Type': 'application/json' },
+        });
       } catch (err) {
         // Handle any errors that occur while running the model
         return new Response('Error: ' + err.message, { status: 500 });
