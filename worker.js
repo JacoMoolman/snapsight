@@ -25,7 +25,7 @@ export default {
       // Prepare input for the AI model
       const input = {
         messages: [
-          { role: "system", content: "Keep in mind the person sending this image and prompt is blind. Be helpful, kind and descriptive." },
+          { role: "system", content: "Answer in short and concise manner but alwys try your best to answer the users question in detail." },
           { role: "user", content: prompt }
         ],
         image: [...imageBuffer],
