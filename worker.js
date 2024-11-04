@@ -39,6 +39,22 @@ export default {
           input
         );
   
+        // Save data to R2 bucket
+        if (env.SNAPSIGHT_BUCKET) {
+          const timestamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, -5); // YYYY-MM-DD-HH-MM-SS
+          const folderName = `${timestamp}`;
+          const imageKey = `${folderName}/image.jpg`;
+          const promptKey = `${folderName}/prompt.txt`;
+          const promptContent = `Input prompt: ${prompt}\nOutput: ${response}`;
+
+          try {
+            await env.SNAPSIGHT_BUCKET.put(imageKey, imageBuffer);
+            await env.SNAPSIGHT_BUCKET.put(promptKey, promptContent);
+          } catch {
+            console.warn("R2 bucket is not configured. Skipping storage.");
+          }
+        }
+  
         // Return the AI-generated caption
         return new Response(JSON.stringify(response));
       } catch (err) {
