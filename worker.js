@@ -22,21 +22,20 @@ export default {
       // Decode base64 image
       const imageBuffer = Uint8Array.from(atob(image), c => c.charCodeAt(0));
   
-      // Combine internal prompt with user prompt
-      const internalPrompt = "Keep in mind the person sending this image and prompt is blind. Be helpfull, kind and descriptiveKeep that in mind as you address the following prompt:  ";
-      const combinedPrompt = `${internalPrompt}${prompt}`;
-  
       // Prepare input for the AI model
       const input = {
+        messages: [
+          { role: "system", content: "Keep in mind the person sending this image and prompt is blind. Be helpful, kind and descriptive." },
+          { role: "user", content: prompt }
+        ],
         image: [...imageBuffer],
-        prompt: combinedPrompt,
         max_tokens: 512,
       };
   
       try {
         // Run the AI model
         const response = await env.AI.run(
-          "@cf/llava-hf/llava-1.5-7b-hf",  // Model identifier
+          "@cf/meta/llama-3.2-11b-vision-instruct",  // Changed model
           input
         );
   
