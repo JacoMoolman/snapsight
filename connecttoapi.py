@@ -15,7 +15,8 @@ with open(image_path, 'rb') as image_file:
 # Prepare the JSON payload
 payload = {
     'image': image_base64,
-    'prompt': 'What time of day is this?'
+    'prompt': 'What time of day is this?',
+    'email': 'test@example.com'  # You can change this email address as needed
 }
 
 # Send the POST request

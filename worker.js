@@ -13,10 +13,10 @@ export default {
         return new Response('Invalid content type! Please send a JSON payload.', { status: 400 });
       }
   
-      const { image, prompt } = await request.json();
+      const { image, prompt, email } = await request.json();
   
-      if (!image || !prompt) {
-        return new Response('Missing image or prompt in the request body', { status: 400 });
+      if (!image || !prompt || !email) {
+        return new Response('Missing image, prompt, or email in the request body', { status: 400 });
       }
   
       // Decode base64 image
@@ -42,7 +42,8 @@ export default {
         // Save data to R2 bucket
         if (env.SNAPSIGHT_BUCKET) {
           const timestamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, -5); // YYYY-MM-DD-HH-MM-SS
-          const folderName = `${timestamp}`;
+          const emailFolder = email.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase(); // Sanitize email for folder name
+          const folderName = `${emailFolder}/${timestamp}`;
           const imageKey = `${folderName}/image.jpg`;
           const promptKey = `${folderName}/prompt.txt`;
           const promptContent = `Input prompt: ${prompt}\nOutput: ${response}`;
